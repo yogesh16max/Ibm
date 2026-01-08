@@ -1,484 +1,357 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Trophy, 
-  Search, 
-  Activity, 
-  Calendar, 
-  TrendingUp, 
-  Users, 
-  ChevronRight, 
-  Filter,
-  BarChart2,
-  MapPin,
-  Menu,
-  X
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thalapathy Vijay | The G.O.A.T</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
 
-// --- Mock Data ---
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
 
-const LIVE_MATCHES = [
-  {
-    id: 1,
-    series: "Border-Gavaskar Trophy",
-    team1: { name: "India", score: "324/4 & 210/3", flag: "🇮🇳" },
-    team2: { name: "Australia", score: "287", flag: "🇦🇺" },
-    status: "Day 3 - Session 2",
-    result: "India lead by 247 runs",
-    type: "TEST"
-  },
-  {
-    id: 2,
-    series: "The Ashes",
-    team1: { name: "England", score: "189/2", flag: "🇬🇧" },
-    team2: { name: "Australia", score: "—", flag: "🇦🇺" },
-    status: "Live",
-    result: "England won the toss and elected to bat",
-    type: "TEST"
-  },
-  {
-    id: 3,
-    series: "IPL 2026",
-    team1: { name: "CSK", score: "210/4", flag: "🦁" },
-    team2: { name: "MI", score: "145/8 (16.4 ov)", flag: "🌪️" },
-    status: "Live",
-    result: "MI need 66 runs in 20 balls",
-    type: "T20"
-  }
-];
+        h1, h2, h3, .heading-font {
+            font-family: 'Oswald', sans-serif;
+        }
 
-const BATTING_STATS = [
-  { id: 1, player: "Virat Kohli", team: "India", matches: 113, runs: 8848, avg: 49.15, hs: "254*", hundreds: 29 },
-  { id: 2, player: "Joe Root", team: "England", matches: 135, runs: 11416, avg: 50.29, hs: "254", hundreds: 30 },
-  { id: 3, player: "Kane Williamson", team: "New Zealand", matches: 94, runs: 8124, avg: 54.89, hs: "251", hundreds: 28 },
-  { id: 4, player: "Steve Smith", team: "Australia", matches: 102, runs: 9320, avg: 58.61, hs: "239", hundreds: 32 },
-  { id: 5, player: "Rohit Sharma", team: "India", matches: 54, runs: 3677, avg: 45.39, hs: "212", hundreds: 10 },
-  { id: 6, player: "Babar Azam", team: "Pakistan", matches: 49, runs: 3772, avg: 47.74, hs: "196", hundreds: 9 },
-  { id: 7, player: "Ruturaj Gaikwad", team: "India", matches: 28, runs: 1205, avg: 41.2, hs: "123*", hundreds: 2 },
-  { id: 8, player: "Travis Head", team: "Australia", matches: 42, runs: 2980, avg: 43.5, hs: "175", hundreds: 7 },
-];
+        /* Hero Animation */
+        .hero-bg {
+            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), 
+                        url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); /* Cinema placeholder */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
 
-const BOWLING_STATS = [
-  { id: 1, player: "Jasprit Bumrah", team: "India", matches: 36, wickets: 158, avg: 20.11, best: "6/27", fiveW: 10 },
-  { id: 2, player: "Pat Cummins", team: "Australia", matches: 55, wickets: 252, avg: 21.89, best: "6/23", fiveW: 9 },
-  { id: 3, player: "R. Ashwin", team: "India", matches: 95, wickets: 490, avg: 23.65, best: "7/59", fiveW: 34 },
-  { id: 4, player: "Kagiso Rabada", team: "South Africa", matches: 60, wickets: 280, avg: 22.34, best: "7/112", fiveW: 13 },
-  { id: 5, player: "Rashid Khan", team: "Afghanistan", matches: 5, wickets: 34, avg: 22.35, best: "7/137", fiveW: 4 },
-  { id: 6, player: "Ravindra Jadeja", team: "India", matches: 68, wickets: 280, avg: 24.12, best: "7/42", fiveW: 13 },
-];
+        .text-gradient {
+            background: linear-gradient(to right, #fbbf24, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-const RANKINGS = {
-  TEST: [
-    { rank: 1, team: "India", rating: 121 },
-    { rank: 2, team: "Australia", rating: 118 },
-    { rank: 3, team: "England", rating: 105 },
-    { rank: 4, team: "South Africa", rating: 102 },
-  ],
-  ODI: [
-    { rank: 1, team: "India", rating: 119 },
-    { rank: 2, team: "Australia", rating: 115 },
-    { rank: 3, team: "Pakistan", rating: 110 },
-  ],
-  T20: [
-    { rank: 1, team: "India", rating: 267 },
-    { rank: 2, team: "England", rating: 259 },
-    { rank: 3, team: "New Zealand", rating: 255 },
-  ]
-};
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+        }
 
-// --- Components ---
+        /* Abstract Vijay Silhouette using CSS */
+        .vijay-icon {
+            width: 100px;
+            height: 100px;
+            background: #fbbf24;
+            mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
+            -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>');
+            mask-size: contain;
+            -webkit-mask-size: contain;
+            mask-repeat: no-repeat;
+            -webkit-mask-repeat: no-repeat;
+            margin: 0 auto;
+        }
 
-const MatchCard = ({ match }) => (
-  <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 min-w-[300px] flex-shrink-0 hover:shadow-md transition-shadow">
-    <div className="flex justify-between items-center mb-3">
-      <span className={`text-xs font-bold px-2 py-1 rounded ${match.type === 'TEST' ? 'bg-red-100 text-red-700' : match.type === 'ODI' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
-        {match.type}
-      </span>
-      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
-        <Activity size={12} className="text-red-500 animate-pulse" /> {match.status}
-      </span>
-    </div>
-    
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{match.team1.flag}</span>
-          <span className="font-semibold text-slate-800 dark:text-white">{match.team1.name}</span>
-        </div>
-        <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{match.team1.score}</span>
-      </div>
-      
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{match.team2.flag}</span>
-          <span className="font-semibold text-slate-800 dark:text-white">{match.team2.name}</span>
-        </div>
-        <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{match.team2.score}</span>
-      </div>
-    </div>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ef4444;
+            border-radius: 4px;
+        }
 
-    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 text-sm text-blue-600 dark:text-blue-400 font-medium">
-      {match.result}
-    </div>
-  </div>
-);
-
-const StatsTable = ({ data, type }) => {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left">
-        <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-400">
-          <tr>
-            <th className="px-4 py-3">Player</th>
-            <th className="px-4 py-3">Team</th>
-            <th className="px-4 py-3">Mat</th>
-            {type === 'batting' ? (
-              <>
-                <th className="px-4 py-3 font-bold text-slate-700 dark:text-slate-200">Runs</th>
-                <th className="px-4 py-3">Avg</th>
-                <th className="px-4 py-3">HS</th>
-                <th className="px-4 py-3">100s</th>
-              </>
-            ) : (
-              <>
-                <th className="px-4 py-3 font-bold text-slate-700 dark:text-slate-200">Wkts</th>
-                <th className="px-4 py-3">Avg</th>
-                <th className="px-4 py-3">BBI</th>
-                <th className="px-4 py-3">5W</th>
-              </>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, idx) => (
-            <tr key={row.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-              <td className="px-4 py-3 font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs flex items-center justify-center font-bold">
-                  {idx + 1}
-                </span>
-                {row.player}
-              </td>
-              <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{row.team}</td>
-              <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.matches}</td>
-              {type === 'batting' ? (
-                <>
-                  <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">{row.runs}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.avg}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.hs}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.hundreds}</td>
-                </>
-              ) : (
-                <>
-                  <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">{row.wickets}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.avg}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.best}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.fiveW}</td>
-                </>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-const RankingCard = ({ title, teams }) => (
-  <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
-    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-      <Trophy size={14} /> {title} Rankings
-    </h3>
-    <div className="space-y-3">
-      {teams.map((t) => (
-        <div key={t.team} className="flex justify-between items-center group cursor-pointer">
-          <div className="flex items-center gap-3">
-            <span className={`w-6 h-6 flex items-center justify-center rounded-md text-xs font-bold ${t.rank === 1 ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-300'}`}>
-              {t.rank}
-            </span>
-            <span className="font-medium text-slate-700 dark:text-slate-200 group-hover:text-blue-600 transition-colors">{t.team}</span>
-          </div>
-          <span className="text-sm font-bold text-slate-900 dark:text-white">{t.rating}</span>
-        </div>
-      ))}
-    </div>
-    <button className="w-full mt-4 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 rounded transition-colors">
-      View Full Table
-    </button>
-  </div>
-);
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState('batting');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false); // Simple dark mode toggle for demo
-
-  // Filter logic
-  const filteredBatting = BATTING_STATS.filter(p => 
-    p.player.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.team.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredBowling = BOWLING_STATS.filter(p => 
-    p.player.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.team.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className={`min-h-screen ${darkMode ? 'dark bg-slate-900' : 'bg-slate-50'} font-sans text-slate-900 dark:text-slate-100 transition-colors duration-200`}>
-      
-      {/* Navbar */}
-      <nav className="bg-blue-700 dark:bg-blue-900 text-white sticky top-0 z-50 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Activity className="text-blue-300" />
-              <span className="font-bold text-xl tracking-tight">CricStat<span className="text-blue-300">Hub</span></span>
-            </div>
-            
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#" className="hover:text-blue-200 font-medium transition-colors">Matches</a>
-              <a href="#" className="hover:text-blue-200 font-medium transition-colors">Stats</a>
-              <a href="#" className="hover:text-blue-200 font-medium transition-colors">Players</a>
-              <a href="#" className="hover:text-blue-200 font-medium transition-colors">Rankings</a>
-              <a href="#" className="hover:text-blue-200 font-medium transition-colors">Fantasy</a>
-            </div>
-
-            <div className="flex items-center gap-4">
-               <button 
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 bg-blue-600 dark:bg-blue-800 rounded-full hover:bg-blue-500 transition-colors"
-                title="Toggle Theme"
-              >
-                {darkMode ? '☀️' : '🌙'}
-              </button>
-              <button className="hidden md:block bg-white text-blue-700 px-4 py-2 rounded-full font-bold text-sm hover:bg-blue-50 transition-colors">
-                Sign In
-              </button>
-              <div className="md:hidden">
-                <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                  {isMenuOpen ? <X /> : <Menu />}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-blue-800 px-4 pt-2 pb-4 space-y-2">
-            <a href="#" className="block px-3 py-2 rounded hover:bg-blue-700">Matches</a>
-            <a href="#" className="block px-3 py-2 rounded hover:bg-blue-700">Stats</a>
-            <a href="#" className="block px-3 py-2 rounded hover:bg-blue-700">Players</a>
-            <a href="#" className="block px-3 py-2 rounded hover:bg-blue-700">Rankings</a>
-          </div>
-        )}
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        /* Modal */
+        #wallpaperModal {
+            transition: opacity 0.3s ease;
+        }
         
-        {/* Live Scores Section */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-              Live Scores
-            </h2>
-            <a href="#" className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center">
-              View All <ChevronRight size={16} />
-            </a>
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {LIVE_MATCHES.map(match => (
-              <MatchCard key={match.id} match={match} />
-            ))}
-          </div>
-        </section>
+        .toast {
+            animation: slideIn 0.5s ease forwards, fadeOut 0.5s ease 2.5s forwards;
+        }
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Main Stats Area */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Featured Stats Container */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Player Statistics</h2>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm">Most runs and wickets in 2024-25</p>
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-crown text-yellow-500 text-2xl"></i>
+                    <span class="heading-font text-2xl font-bold tracking-wider text-white">THALAPATHY</span>
                 </div>
-                
-                {/* Search & Filter */}
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    <input 
-                      type="text" 
-                      placeholder="Search player..." 
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
-                    />
-                  </div>
-                  <button className="p-2 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700">
-                    <Filter size={18} className="text-slate-500 dark:text-slate-400" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex border-b border-slate-100 dark:border-slate-700">
-                <button 
-                  onClick={() => setActiveTab('batting')}
-                  className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${activeTab === 'batting' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 dark:bg-slate-700/50 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                >
-                  <TrendingUp size={18} /> Most Runs
-                </button>
-                <button 
-                  onClick={() => setActiveTab('bowling')}
-                  className={`flex-1 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${activeTab === 'bowling' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 dark:bg-slate-700/50 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                >
-                  <BarChart2 size={18} /> Most Wickets
-                </button>
-              </div>
-
-              {/* Table */}
-              <div className="min-h-[400px]">
-                <StatsTable 
-                  data={activeTab === 'batting' ? filteredBatting : filteredBowling} 
-                  type={activeTab} 
-                />
-              </div>
-              
-              <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30 text-center">
-                <button className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
-                  View Full Statistics Database
-                </button>
-              </div>
-            </div>
-
-            {/* News / Highlights Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer">
-                <div className="absolute top-0 right-0 p-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="relative z-10">
-                  <span className="bg-white/20 px-2 py-1 rounded text-xs font-medium mb-3 inline-block">Analysis</span>
-                  <h3 className="text-xl font-bold mb-2">Kohli's Masterclass in Perth</h3>
-                  <p className="text-indigo-100 text-sm mb-4">A deep dive into how Virat Kohli dismantled the Australian pace attack on a spicy wicket.</p>
-                  <div className="flex items-center gap-2 text-xs font-medium">
-                    Read Article <ChevronRight size={14} />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 group cursor-pointer hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-                 <div className="flex items-start justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Upcoming</span>
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">IPL 2026 Auction</h3>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">All eyes on Rishabh Pant and Rohit Sharma as teams look to rebuild.</p>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="hover:text-red-500 px-3 py-2 rounded-md text-sm font-medium transition">Home</a>
+                        <a href="#wallpapers" class="hover:text-red-500 px-3 py-2 rounded-md text-sm font-medium transition">Wallpapers</a>
+                        <a href="#filmography" class="hover:text-red-500 px-3 py-2 rounded-md text-sm font-medium transition">Filmography</a>
                     </div>
-                    <Calendar className="text-blue-500" />
-                 </div>
-                 <div className="mt-6 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                    View Schedule <ChevronRight size={16} />
-                 </div>
-              </div>
+                </div>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-bold text-sm transition shadow-lg shadow-red-600/20" onclick="showToast('Welcome Thalapathy Fan!')">
+                    Fan Club
+                </button>
             </div>
-
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-             {/* Rankings Widget */}
-             <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-bold text-lg text-slate-900 dark:text-white">Team Rankings</h2>
-                </div>
-                <RankingCard title="Test" teams={RANKINGS.TEST} />
-                <RankingCard title="T20I" teams={RANKINGS.T20} />
-             </div>
-
-             {/* Trending Players */}
-             <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
-                <h3 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <Users size={18} className="text-blue-500" /> Trending Players
-                </h3>
-                <div className="space-y-4">
-                   {[
-                     { name: "Ruturaj Gaikwad", team: "India", role: "Batter" },
-                     { name: "Rachin Ravindra", team: "NZ", role: "All-rounder" },
-                     { name: "Gerald Coetzee", team: "SA", role: "Bowler" }
-                   ].map((p, i) => (
-                     <div key={i} className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-lg">
-                          👤
-                        </div>
-                        <div>
-                           <p className="text-sm font-bold text-slate-900 dark:text-white">{p.name}</p>
-                           <p className="text-xs text-slate-500 dark:text-slate-400">{p.team} • {p.role}</p>
-                        </div>
-                     </div>
-                   ))}
-                </div>
-             </div>
-
-             {/* Location Widget (Nod to Chennai) */}
-             <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 border border-yellow-200 dark:border-yellow-700/30">
-                <div className="flex items-center gap-2 mb-2 text-yellow-700 dark:text-yellow-500">
-                   <MapPin size={16} />
-                   <span className="text-xs font-bold uppercase">Fan Zone: Chennai</span>
-                </div>
-                <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
-                   Next Match at Chepauk: <br/>
-                   <span className="font-bold">CSK vs RCB</span>
-                </p>
-                <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                   Tickets opening soon for the playoffs!
-                </div>
-             </div>
-          </div>
         </div>
-      </main>
+    </nav>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-12 mt-12">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4 text-white">
-                <Activity />
-                <span className="font-bold text-xl">CricStatHub</span>
-              </div>
-              <p className="text-sm">The world's most accurate and rapid cricket statistics platform. Made for the fans, by the fans.</p>
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center justify-center pt-16">
+        <div class="text-center px-4 max-w-4xl mx-auto">
+            <div class="mb-6 animate-bounce">
+                <span class="bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">The Greatest of All Time</span>
             </div>
-            <div>
-               <h4 className="text-white font-bold mb-4">Quick Links</h4>
-               <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="hover:text-white">Live Scores</a></li>
-                  <li><a href="#" className="hover:text-white">Series Archive</a></li>
-                  <li><a href="#" className="hover:text-white">Player Search</a></li>
-               </ul>
+            <h1 class="text-6xl md:text-8xl font-bold mb-4 tracking-tighter uppercase leading-none">
+                Vijay <br>
+                <span class="text-gradient">Joseph</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 mb-8 font-light max-w-2xl mx-auto">
+                Celebrating the career, style, and mass appeal of Indian Cinema's biggest superstar.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#wallpapers" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-bold text-lg transition transform hover:scale-105 flex items-center justify-center gap-2">
+                    <i class="fas fa-images"></i> Get Wallpapers
+                </a>
+                <button onclick="playWhistle()" class="border border-slate-500 hover:border-yellow-500 hover:text-yellow-500 text-slate-300 px-8 py-3 rounded-lg font-bold text-lg transition bg-slate-800/50 backdrop-blur-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-play"></i> Watch Tribute
+                </button>
             </div>
-            <div>
-               <h4 className="text-white font-bold mb-4">Community</h4>
-               <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="hover:text-white">Forums</a></li>
-                  <li><a href="#" className="hover:text-white">Fantasy Tips</a></li>
-                  <li><a href="#" className="hover:text-white">Merchandise</a></li>
-               </ul>
+        </div>
+    </section>
+
+    <!-- Wallpapers Section -->
+    <section id="wallpapers" class="py-20 bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-white mb-4 uppercase heading-font">Exclusive <span class="text-red-500">Wallpapers</span></h2>
+                <div class="h-1 w-24 bg-yellow-500 mx-auto rounded"></div>
+                <p class="mt-4 text-slate-400">Click to preview and download.</p>
             </div>
-            <div>
-               <h4 className="text-white font-bold mb-4">Newsletter</h4>
-               <div className="flex gap-2">
-                  <input type="email" placeholder="Email address" className="bg-slate-800 border-none rounded text-sm px-3 py-2 w-full focus:ring-1 focus:ring-blue-500" />
-                  <button className="bg-blue-600 text-white px-3 py-2 rounded text-sm font-bold hover:bg-blue-500">Go</button>
-               </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Wallpaper Card 1 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group relative cursor-pointer" onclick="openModal('Leo / Bloody Sweet', 'linear-gradient(45deg, #3f0d0d, #000)')">
+                    <div class="h-64 bg-slate-700 relative overflow-hidden">
+                        <!-- Simulated Image with CSS Gradient -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-red-900 to-black opacity-80 group-hover:scale-110 transition duration-700"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                             <h3 class="text-4xl font-bold text-white opacity-20 uppercase rotate-12">LEO</h3>
+                        </div>
+                    </div>
+                    <div class="p-6 relative z-10">
+                        <h3 class="text-xl font-bold text-white mb-1">Bloody Sweet</h3>
+                        <p class="text-slate-400 text-sm">Action / Thriller Theme</p>
+                        <div class="absolute top-4 right-4 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">HD</div>
+                    </div>
+                </div>
+
+                <!-- Wallpaper Card 2 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group relative cursor-pointer" onclick="openModal('The G.O.A.T', 'linear-gradient(45deg, #1e3a8a, #000)')">
+                    <div class="h-64 bg-slate-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-900 to-black opacity-80 group-hover:scale-110 transition duration-700"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                             <h3 class="text-4xl font-bold text-white opacity-20 uppercase -rotate-6">GOAT</h3>
+                        </div>
+                    </div>
+                    <div class="p-6 relative z-10">
+                        <h3 class="text-xl font-bold text-white mb-1">The G.O.A.T</h3>
+                        <p class="text-slate-400 text-sm">Sci-Fi / Action Theme</p>
+                        <div class="absolute top-4 right-4 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">4K</div>
+                    </div>
+                </div>
+
+                <!-- Wallpaper Card 3 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group relative cursor-pointer" onclick="openModal('Master / JD', 'linear-gradient(45deg, #0f766e, #000)')">
+                    <div class="h-64 bg-slate-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-teal-900 to-black opacity-80 group-hover:scale-110 transition duration-700"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                             <h3 class="text-4xl font-bold text-white opacity-20 uppercase">MASTER</h3>
+                        </div>
+                    </div>
+                    <div class="p-6 relative z-10">
+                        <h3 class="text-xl font-bold text-white mb-1">Master JD</h3>
+                        <p class="text-slate-400 text-sm">Class & Mass Theme</p>
+                        <div class="absolute top-4 right-4 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">HD</div>
+                    </div>
+                </div>
             </div>
-         </div>
-         <div className="text-center text-xs mt-12 pt-8 border-t border-slate-800">
-            © 2026 CricStatHub. All rights reserved. Data provided by simulated API.
-         </div>
-      </footer>
+        </div>
+    </section>
+
+    <!-- Stats / Bio Section -->
+    <section id="filmography" class="py-20 bg-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl md:text-5xl font-bold heading-font mb-6">Mass Hero. <br><span class="text-red-500">Box Office King.</span></h2>
+                    <p class="text-slate-300 leading-relaxed mb-6">
+                        From his early days as a child artist to becoming the "Thalapathy" of Tamil cinema, Vijay has captivated millions with his dance, action, and screen presence.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center space-x-3">
+                            <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                            <span>Over 65 Films completed</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                            <span>Multiple State & International Awards</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                            <span>Known for Ghilli, Thuppakki, Mersal, Leo</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-900 p-6 rounded-lg text-center transform translate-y-4">
+                        <i class="fas fa-film text-4xl text-red-500 mb-2"></i>
+                        <h4 class="text-3xl font-bold text-white">68+</h4>
+                        <p class="text-xs uppercase tracking-widest text-slate-400">Movies</p>
+                    </div>
+                    <div class="bg-slate-900 p-6 rounded-lg text-center">
+                        <i class="fas fa-users text-4xl text-yellow-500 mb-2"></i>
+                        <h4 class="text-3xl font-bold text-white">100M+</h4>
+                        <p class="text-xs uppercase tracking-widest text-slate-400">Fans</p>
+                    </div>
+                    <div class="bg-slate-900 p-6 rounded-lg text-center transform translate-y-4">
+                        <i class="fas fa-music text-4xl text-blue-500 mb-2"></i>
+                        <h4 class="text-3xl font-bold text-white">30+</h4>
+                        <p class="text-xs uppercase tracking-widest text-slate-400">Songs Sung</p>
+                    </div>
+                    <div class="bg-slate-900 p-6 rounded-lg text-center">
+                        <i class="fas fa-rupee-sign text-4xl text-green-500 mb-2"></i>
+                        <h4 class="text-3xl font-bold text-white">#1</h4>
+                        <p class="text-xs uppercase tracking-widest text-slate-400">Highest Paid</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 py-8 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-sm">
+                Designed for Thalapathy Fans. Always keep the wallpaper high.
+            </p>
+            <div class="mt-4 flex justify-center space-x-6">
+                <a href="#" class="text-slate-400 hover:text-white transition"><i class="fab fa-twitter text-xl"></i></a>
+                <a href="#" class="text-slate-400 hover:text-white transition"><i class="fab fa-instagram text-xl"></i></a>
+                <a href="#" class="text-slate-400 hover:text-white transition"><i class="fab fa-youtube text-xl"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Wallpaper Preview Modal -->
+    <div id="wallpaperModal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg p-4">
+            <div class="bg-slate-800 rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
+                <div class="p-4 flex justify-between items-center border-b border-slate-700">
+                    <h3 id="modalTitle" class="text-xl font-bold text-white">Wallpaper</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <div id="modalPreview" class="h-64 sm:h-80 w-full flex items-center justify-center relative">
+                     <!-- Dynamic Content injected by JS -->
+                     <h1 class="text-6xl font-black text-white/10 uppercase absolute select-none">Preview</h1>
+                </div>
+                <div class="p-6 flex flex-col gap-3">
+                    <button onclick="downloadWallpaper()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                        <i class="fas fa-download"></i> Download Wallpaper
+                    </button>
+                    <button onclick="setAsWallpaper()" class="w-full border border-slate-600 hover:bg-slate-700 text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                        <i class="fas fa-desktop"></i> Set as Background
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-  );
-}
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // Modal Logic
+        const modal = document.getElementById('wallpaperModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalPreview = document.getElementById('modalPreview');
+        let currentGradient = '';
+
+        function openModal(title, gradient) {
+            modalTitle.innerText = title;
+            currentGradient = gradient;
+            modalPreview.style.background = gradient;
+            modal.classList.remove('hidden');
+            // Animate in
+            modal.querySelector('div.transform').classList.remove('scale-95', 'opacity-0');
+            modal.querySelector('div.transform').classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        // Action Simulation
+        function downloadWallpaper() {
+            showToast('Downloading ' + modalTitle.innerText + '...');
+            setTimeout(() => {
+                showToast('Download Complete!');
+            }, 1500);
+        }
+
+        function setAsWallpaper() {
+            showToast('Setting wallpaper...');
+            // Change the body background to simulate setting wallpaper
+            setTimeout(() => {
+                document.getElementById('home').style.backgroundImage = currentGradient;
+                showToast('Wallpaper Updated Successfully!');
+                closeModal();
+            }, 1000);
+        }
+
+        function playWhistle() {
+            showToast('Playing Tribute Video (Demo)...');
+        }
+
+        // Toast Notification System
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-800 border-l-4 border-yellow-500 text-white px-6 py-4 rounded shadow-2xl flex items-center gap-3 toast pointer-events-auto min-w-[300px]';
+            toast.innerHTML = `
+                <i class="fas fa-check-circle text-yellow-500"></i>
+                <span class="font-medium">${message}</span>
+            `;
+            container.appendChild(toast);
+
+            // Remove after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
